@@ -1,0 +1,550 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kepler23b | Kepler23b</title><meta name="author" content="Rowe"><meta name="copyright" content="Rowe"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1 U-Boot使用 适用于已经有了适配的U-Boot  1.1 初次编译   安装ncurses库 sudo apt-get install libncurses5-dev ncurses是提供字符终端处理库。   解压U-Boot tar -vxjf uboot-imx-2016.03-2.1.0-g8b546e4.tar.bz2  v 详细报告rar处理的文件信息 x 从压缩文件中释放文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kepler23b">
+<meta property="og:url" content="https://kepler23b.gitee.io/2021/02/26/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/U-Boot%E7%A7%BB%E6%A4%8D/index.html">
+<meta property="og:site_name" content="Kepler23b">
+<meta property="og:description" content="1 U-Boot使用 适用于已经有了适配的U-Boot  1.1 初次编译   安装ncurses库 sudo apt-get install libncurses5-dev ncurses是提供字符终端处理库。   解压U-Boot tar -vxjf uboot-imx-2016.03-2.1.0-g8b546e4.tar.bz2  v 详细报告rar处理的文件信息 x 从压缩文件中释放文件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg">
+<meta property="article:published_time" content="2021-02-26T11:50:24.472Z">
+<meta property="article:modified_time" content="2021-02-26T11:40:33.881Z">
+<meta property="article:author" content="Rowe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kepler23b.gitee.io/2021/02/26/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/U-Boot%E7%A7%BB%E6%A4%8D/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: true
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-02-26 19:40:33'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}const fontSizeVal = saveToLocal.get('global-font-size')
+if (fontSizeVal !== undefined) {
+  document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+}})()</script><link rel="stylesheet" href="//at.alicdn.com/t/font_2272646_jy3vlys7ayt.css"><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/kaila.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw iconfont icon-liuyanban1"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Kepler23b</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw iconfont icon-liuyanban1"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">无题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-02-26T11:50:24.472Z" title="发表于 2021-02-26 19:50:24">2021-02-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-02-26T11:40:33.881Z" title="更新于 2021-02-26 19:40:33">2021-02-26</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="1-u-boot使用"><a class="markdownIt-Anchor" href="#1-u-boot使用"></a> 1 U-Boot使用</h2>
+<p>适用于已经有了适配的U-Boot</p>
+<h3 id="11-初次编译"><a class="markdownIt-Anchor" href="#11-初次编译"></a> 1.1 初次编译</h3>
+<ul>
+<li>
+<p>安装ncurses库</p>
+<p><code>sudo apt-get install libncurses5-dev</code></p>
+<p>ncurses是提供字符终端处理库。</p>
+</li>
+<li>
+<p>解压U-Boot</p>
+<p><code>tar -vxjf uboot-imx-2016.03-2.1.0-g8b546e4.tar.bz2</code></p>
+<ul>
+<li>v 详细报告rar处理的文件信息</li>
+<li>x 从压缩文件中释放文件</li>
+<li>j 压缩/解压缩 bzip2</li>
+<li>f 指定压缩文件的名字</li>
+<li>-C 指定解压目录</li>
+</ul>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225105840.png" alt="image-20210225105837689" /></p>
+</li>
+<li>
+<p>编译脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- mx6ull_14x14_ddr512_emmc_defconfig</span><br><span class="line">make V=1 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j2</span><br></pre></td></tr></table></figure>
+<p>执行<code>bash mx6ull_alientek_emmc.sh</code></p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225113311.png" alt="image-20210225113308956" /></p>
+</li>
+</ul>
+<h3 id="12-烧写与启动"><a class="markdownIt-Anchor" href="#12-烧写与启动"></a> 1.2 烧写与启动</h3>
+<p>使用imxdownload将uboot烧写到SD卡里面去，用SD卡进行启动uboot。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod 700 imxdownload 				//给予 imxdownload 可执行权限，一次即可</span><br><span class="line">./imxdownload u-boot.bin /dev/sdd</span><br></pre></td></tr></table></figure>
+<h3 id="13-u-boot命令使用"><a class="markdownIt-Anchor" href="#13-u-boot命令使用"></a> 1.3 U-Boot命令使用</h3>
+<h4 id="网络操作"><a class="markdownIt-Anchor" href="#网络操作"></a> 网络操作</h4>
+<p>tftp命令</p>
+<p>Ubuntu 搭建TFTP服务器</p>
+<p>安装 tftp-hpa 和 tftpd-hpa</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install tftp-hpa tftpd-hpa</span><br><span class="line">sudo apt-get install xinetd</span><br></pre></td></tr></table></figure>
+<p>创建共享文件夹tftpboot 并给权限</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir ~/Linux/tftpboot</span><br><span class="line">chmod <span class="number">777</span> ~/Linux/tftpboot</span><br></pre></td></tr></table></figure>
+<p>新建文件/etc/xinetd.d/tftp</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">server tftp</span><br><span class="line">&#123;</span><br><span class="line">	socket_type &#x3D; dgram</span><br><span class="line">	protocol &#x3D; udp</span><br><span class="line">	wait &#x3D; yes</span><br><span class="line">	user &#x3D; root</span><br><span class="line">	server &#x3D; &#x2F;usr&#x2F;sbin&#x2F;in.tftpd</span><br><span class="line">	server_args &#x3D; -s &#x2F;home&#x2F;zuozhongkai&#x2F;linux&#x2F;tftpboot&#x2F;</span><br><span class="line">	disable &#x3D; no</span><br><span class="line">	per_source &#x3D; 11</span><br><span class="line">	cps &#x3D; 100 2</span><br><span class="line">	flags &#x3D; IPv4</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>启动 tftp 服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo service tftpd-hpa start</span><br></pre></td></tr></table></figure>
+<p>修改/etc/default/tftpd-hpa 文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># &#x2F;etc&#x2F;default&#x2F;tftpd-hpa</span><br><span class="line"></span><br><span class="line">TFTP_USERNAME&#x3D;&quot;tftp&quot;</span><br><span class="line">TFTP_DIRECTORY&#x3D;&quot;&#x2F;home&#x2F;kepler&#x2F;Linux&#x2F;tftpboot&quot;		&#x2F;&#x2F;提供下载的文件夹</span><br><span class="line">TFTP_ADDRESS&#x3D;&quot;:69&quot;</span><br><span class="line">TFTP_OPTIONS&#x3D;&quot;-l -c -s&quot;</span><br></pre></td></tr></table></figure>
+<p>重启tftp 服务器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo service tftpd-hpa restart</span><br></pre></td></tr></table></figure>
+<p>使用</p>
+<p>tftp  [loadAddress] [[hostIPaddr:]bootfilename]</p>
+<h2 id="2-u-boot移植"><a class="markdownIt-Anchor" href="#2-u-boot移植"></a> 2 U-Boot移植</h2>
+<p>使用nxp提供的U-Boot进行配置。</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225115111.PNG" alt="20210225_IMG_1530" /></p>
+<h3 id="21-nxp官方开发板uboot编译测试"><a class="markdownIt-Anchor" href="#21-nxp官方开发板uboot编译测试"></a> 2.1 NXP官方开发板uboot编译测试</h3>
+<ul>
+<li>
+<p>解压uboot</p>
+<p><code>tar -vxjf uboot-imx-rel_imx_4.1.15_2.1.0_ga.tar.bz2 -C src</code></p>
+</li>
+<li>
+<p>默认配置文件 尺寸 内存</p>
+<p>mx6ull_14x14_evk_emmc_defconfig</p>
+</li>
+<li>
+<p>编译NXP官方开发板对应的uboot</p>
+<p>编写脚本 mx6ull_14x14_evk_emmc.sh</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- mx6ull_14x14_evk_emmc_defconfig</span><br><span class="line">make V=1 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j2</span><br></pre></td></tr></table></figure>
+<p>执行脚本</p>
+<p><code>bash mx6ull_14x14_evk_emmc.sh</code></p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225121341.png" alt="image-20210225121339228" /></p>
+<p>编译后的文件目录</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225121604.png" alt="image-20210225121602640" /></p>
+</li>
+<li>
+<p>烧写验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod 777 imxdownload //给予 imxdownload 可执行权限</span><br><span class="line">./imxdownload u-boot.bin /dev/sdg //烧写 u-boot.bin 到 SD 卡中</span><br></pre></td></tr></table></figure>
+<p>运行情况</p>
+<p>①、 uboot 启动正常， DRAM 识别正确， SD 卡和 EMMC 驱动正常。<br />
+②、 uboot 里面的 LCD 驱动默认是给 4.3 寸 480x272 分辨率的，如果使用的其他分辨率的<br />
+屏幕需要修改驱动。<br />
+③、网络不能工作，识别不出来网络信息，需要修改驱动。</p>
+<p>需要解决的问题</p>
+<p>①、在 uboot 中添加自己的开发板，也就是正点原子的 I.MX6ULL 开发板。<br />
+②、解决 LCD 驱动和网络驱动的问题。</p>
+</li>
+</ul>
+<h3 id="22-添加自己的开发板配置"><a class="markdownIt-Anchor" href="#22-添加自己的开发板配置"></a> 2.2 添加自己的开发板配置</h3>
+<h4 id="增加默认配置文件"><a class="markdownIt-Anchor" href="#增加默认配置文件"></a> 增加默认配置文件</h4>
+<p>mx6ull_alientek_emmc_defconfig</p>
+<h4 id="添加开发板对应的头文件"><a class="markdownIt-Anchor" href="#添加开发板对应的头文件"></a> 添加开发板对应的头文件</h4>
+<p>cp include/configs/mx6ullevk.h include/configs/mx6ull_alientek_emmc.h</p>
+<h4 id="添加板级文件夹"><a class="markdownIt-Anchor" href="#添加板级文件夹"></a> 添加板级文件夹</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> board/freescale/</span><br><span class="line">cp mx6ullevk/ -r mx6ull_alientek_emmc</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> mx6ull_alientek_emmc</span><br><span class="line">mv mx6ullevk.c mx6ull_alientek_emmc.c</span><br></pre></td></tr></table></figure>
+<ul>
+<li>修改Makefile</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (C) Copyright 2015 Freescale Semiconductor, Inc.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># SPDX-License-Identifier: GPL-2.0+</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line">obj-y := mx6ull_alientek_emmc.o</span><br><span class="line"></span><br><span class="line">extra-$(CONFIG_USE_PLUGIN) := plugin.bin</span><br><span class="line">$(obj)/plugin.bin: $(obj)/plugin.o</span><br><span class="line">$(OBJCOPY) -O binary --gap-fill 0xff $&lt; <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>修改imximage.cfg</li>
+</ul>
+<p>PLUGIN board/freescale/mx6ullevk/plugin.bin 0x00907000 改为：<br />
+PLUGIN board/freescale/mx6ull_alientek_emmc /plugin.bin 0x00907000</p>
+<ul>
+<li>修改Kconfig 文件</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> TARGET_MX6ULL_ALIENTEK_EMMC</span><br><span class="line"></span><br><span class="line">config SYS_BOARD</span><br><span class="line">default <span class="string">&quot;mx6ull_alientek_emmc&quot;</span></span><br><span class="line"></span><br><span class="line">config SYS_VENDOR</span><br><span class="line">default <span class="string">&quot;freescale&quot;</span></span><br><span class="line"></span><br><span class="line">config SYS_SOC</span><br><span class="line">default <span class="string">&quot;mx6&quot;</span></span><br><span class="line"></span><br><span class="line">config SYS_CONFIG_NAME</span><br><span class="line">default <span class="string">&quot;mx6ull_alientek_emmc&quot;</span></span><br><span class="line"></span><br><span class="line">endif</span><br></pre></td></tr></table></figure>
+<ul>
+<li>修改 MAINTAINERS</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MX6ULL_ALIENTEK_EMMC BOARD</span><br><span class="line">M:	Peng Fan &lt;peng.fan@nxp.com&gt;</span><br><span class="line">S:	Maintained</span><br><span class="line">F:	board&#x2F;freescale&#x2F;mx6ull_alientek_emmc&#x2F;</span><br><span class="line">F:	include&#x2F;configs&#x2F;mx6ull_alientek_emmc.h</span><br><span class="line">F:	configs&#x2F;mx6ull_alientek_emmc_defconfig</span><br></pre></td></tr></table></figure>
+<h4 id="修改u-boot图形界面配置文件"><a class="markdownIt-Anchor" href="#修改u-boot图形界面配置文件"></a> 修改U-Boot图形界面配置文件</h4>
+<p>修改arch/arm/cpu/armv7/mx6/Kconfig</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225205809.png" alt="image-20210225205805691" /></p>
+<h4 id="使用新添加的板子配置编译uboot"><a class="markdownIt-Anchor" href="#使用新添加的板子配置编译uboot"></a> 使用新添加的板子配置编译uboot</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#/bin/bash</span></span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- mx6ull_alientek_emmc_defconfig</span><br><span class="line">make V=1 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j2</span><br></pre></td></tr></table></figure>
+<p>编译之后的信息</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225211741.png" alt="image-20210225211738694" /></p>
+<p>可以看到LCD驱动和网络驱动是有问题的，需要修改。</p>
+<h4 id="lcd-驱动修改"><a class="markdownIt-Anchor" href="#lcd-驱动修改"></a> LCD 驱动修改</h4>
+<p>重点关注：</p>
+<p>①、 LCD 所使用的 GPIO，查看 uboot 中 LCD 的 IO 配置是否正确。<br />
+②、 LCD 背光引脚 GPIO 的配置。<br />
+③、 LCD 配置参数是否正确。</p>
+<p>I.MX6U-ALPHA 开发板 LCD 原理图和 NXP 官方 I.MX6ULL 开发板一致 ，IO不用修改了。</p>
+<ul>
+<li>修改配置参数</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">display_info_t</span> <span class="title">const</span> <span class="title">displays</span>[] =</span> &#123;&#123;</span><br><span class="line">	.bus = MX6UL_LCDIF1_BASE_ADDR,</span><br><span class="line">	.addr = <span class="number">0</span>,</span><br><span class="line">	.pixfmt = <span class="number">24</span>,</span><br><span class="line">	.detect = <span class="literal">NULL</span>,</span><br><span class="line">	.enable	= do_enable_parallel_lcd,</span><br><span class="line">	.mode	= &#123;</span><br><span class="line">		.name			= <span class="string">&quot;TFT7084&quot;</span>,</span><br><span class="line">		.xres           = <span class="number">800</span>,</span><br><span class="line">		.yres           = <span class="number">480</span>,</span><br><span class="line">		.pixclock       = <span class="number">30030</span>,		<span class="comment">/* (1/33.3)*(10^6) */</span></span><br><span class="line">		.left_margin    = <span class="number">46</span>,			<span class="comment">/* HBPD */</span></span><br><span class="line">		.right_margin   = <span class="number">210</span>,			<span class="comment">/* HFPD */</span></span><br><span class="line">		.upper_margin   = <span class="number">23</span>,			<span class="comment">/* VBPD */</span></span><br><span class="line">		.lower_margin   = <span class="number">22</span>,			<span class="comment">/* VFBD */</span></span><br><span class="line">		.hsync_len      = <span class="number">1</span>,			<span class="comment">/* HSPW */</span></span><br><span class="line">		.vsync_len      = <span class="number">1</span>,			<span class="comment">/* VSPW */</span></span><br><span class="line">		.sync           = <span class="number">0</span>,</span><br><span class="line">		.vmode          = FB_VMODE_NONINTERLACED</span><br><span class="line">&#125; &#125; &#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>
+<p>更改mx6ull_alientek_emmc.h 中的 panel=TFT 7084</p>
+</li>
+<li>
+<p>重新编译后 烧写到sd卡 进入uboot的信息</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210225224216.png" alt="image-20210225224214051" /></p>
+<ul>
+<li>
+<p>更改环境变量 uboot下输入命令（如屏幕仍然出现黑屏 修改环境变量）</p>
+<p>setenv panel TFT7084<br />
+saveenv</p>
+</li>
+</ul>
+<h4 id="网络驱动修改"><a class="markdownIt-Anchor" href="#网络驱动修改"></a> 网络驱动修改</h4>
+<p>1、网络简介</p>
+<p>I.MX6UL/ULL    			内部 MAC+外部 PHY 芯片    （速度更快 内部MAC带有DMA）</p>
+<p>三星2440、4412等	   DM9000 网络芯片（外部 MAC+外部PHY  ）</p>
+<p>I.MX6U-ALPHA 有两个网络接口ENET1 和 ENET2  都使用LAN8720A 作为 PHY 芯片</p>
+<p>I.MX6ULL EVK 开发板使用 KSZ8081 PHY 芯片</p>
+<p>更换PHY芯片之后，需要调整网络驱动</p>
+<p>ENET1 网络驱动重点关注：</p>
+<p>①、 ENET1 复位引脚初始化。SNVS_TAMPER7<br />
+②、 LAN8720A 的器件 ID。<br />
+③、 LAN8720 驱动</p>
+<p>ENET2 网络驱动 重点关注</p>
+<p>①、 ENET2 的复位引脚ENET2_RST 接到了I.MX6ULL 的 SNVS_TAMPER8 上。<br />
+②、 ENET2 所使用的 PHY 芯片器件地址为 0X1。<br />
+③、 LAN8720 驱动， ENET1 和 ENET2 都使用的 LAN8720，所以驱动肯定是一样的。</p>
+<p>2、修改网络PHY地址</p>
+<p>mx6ull_alientek_emmc.h</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_CMD_NET</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_CMD_PING</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_CMD_DHCP</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_CMD_MII</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_FEC_MXC</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_MII</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_FEC_ENET_DEV		1		<span class="comment">/* 定义网口2 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> (CONFIG_FEC_ENET_DEV == 0)			<span class="comment">/* 网口1 */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMX_FEC_BASE			ENET_BASE_ADDR</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_FEC_MXC_PHYADDR          0x0				<span class="comment">/* 网口1地址 */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_FEC_XCV_TYPE             RMII</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">elif</span> (CONFIG_FEC_ENET_DEV == 1)		<span class="comment">/* 网口2 */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMX_FEC_BASE			ENET2_BASE_ADDR</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_FEC_MXC_PHYADDR		0x1					<span class="comment">/* 网口2地址 */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_FEC_XCV_TYPE		RMII</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_ETHPRIME			<span class="meta-string">&quot;FEC&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_PHYLIB</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_PHY_SMSC   				<span class="comment">/* 使能LAN8720A 的驱动 SMSC 公司 */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<p>做了三处修改</p>
+<p>①、修改 ENET1 网络 PHY 的地址。<br />
+②、修改 ENET2 网络 PHY 的地址。<br />
+③、使能 SMSC 公司的 PHY 驱动。</p>
+<p>3、删除 uboot 中 74LV595 的驱动代码</p>
+<p>mx6ull_alientek_emmc.c</p>
+<p>删除 74LV595 引脚  定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IOX_SDI IMX_GPIO_NR(5, 10)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IOX_STCP IMX_GPIO_NR(5, 7)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IOX_SHCP IMX_GPIO_NR(5, 11)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IOX_OE IMX_GPIO_NR(5, 8)</span></span><br></pre></td></tr></table></figure>
+<p>添加网络复位引脚</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ENET1_RESET IMX_GPIO_NR(5, 7)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ENET2_RESET IMX_GPIO_NR(5, 8)</span></span><br></pre></td></tr></table></figure>
+<p>删除引脚配置结构体</p>
+<p><strong>static iomux_v3_cfg_t const iox_pads[]</strong></p>
+<p>删除74LV595 初始化以及电平控制函数</p>
+<p>**static void iox74lv_init(void)  **</p>
+<p><strong>void iox74lv_set(int index)</strong></p>
+<p>删除板子初始化函数</p>
+<p>**int board_init(void)  **</p>
+<p>4、添加I.MX6U-ALPHA 开发板网络复位引脚驱动</p>
+<p><strong>mx6ull_alientek_emmc.c</strong></p>
+<p>默认网络 IO 结构体数组</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 网口1 IO配置 */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">iomux_v3_cfg_t</span> <span class="keyword">const</span> fec1_pads[] = &#123;</span><br><span class="line">	MX6_PAD_GPIO1_IO06__ENET1_MDIO | MUX_PAD_CTRL(MDIO_PAD_CTRL),</span><br><span class="line">	MX6_PAD_GPIO1_IO07__ENET1_MDC | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_TX_DATA0__ENET1_TDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_TX_DATA1__ENET1_TDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_TX_EN__ENET1_TX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_TX_CLK__ENET1_REF_CLK1 | MUX_PAD_CTRL(ENET_CLK_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_RX_DATA0__ENET1_RDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_RX_DATA1__ENET1_RDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_RX_ER__ENET1_RX_ER | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET1_RX_EN__ENET1_RX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">    </span><br><span class="line">   <span class="comment">//添加的IO </span></span><br><span class="line">	MX6_PAD_SNVS_TAMPER7__GPIO5_IO07 | MUX_PAD_CTRL(NO_PAD_CTRL),</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">/* 网口2 IO配置 */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">iomux_v3_cfg_t</span> <span class="keyword">const</span> fec2_pads[] = &#123;</span><br><span class="line">	MX6_PAD_GPIO1_IO06__ENET2_MDIO | MUX_PAD_CTRL(MDIO_PAD_CTRL),</span><br><span class="line">	MX6_PAD_GPIO1_IO07__ENET2_MDC | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line"></span><br><span class="line">	MX6_PAD_ENET2_TX_DATA0__ENET2_TDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET2_TX_DATA1__ENET2_TDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET2_TX_CLK__ENET2_REF_CLK2 | MUX_PAD_CTRL(ENET_CLK_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET2_TX_EN__ENET2_TX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line"></span><br><span class="line">	MX6_PAD_ENET2_RX_DATA0__ENET2_RDATA00 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET2_RX_DATA1__ENET2_RDATA01 | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET2_RX_EN__ENET2_RX_EN | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">	MX6_PAD_ENET2_RX_ER__ENET2_RX_ER | MUX_PAD_CTRL(ENET_PAD_CTRL),</span><br><span class="line">    </span><br><span class="line">   <span class="comment">//添加的IO </span></span><br><span class="line">	MX6_PAD_SNVS_TAMPER8__GPIO5_IO08 | MUX_PAD_CTRL(NO_PAD_CTRL),</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>setup_iomux_fec 函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setup_iomux_fec</span><span class="params">(<span class="keyword">int</span> fec_id)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (fec_id == <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		imx_iomux_v3_setup_multiple_pads(fec1_pads,</span><br><span class="line">						 ARRAY_SIZE(fec1_pads));</span><br><span class="line"></span><br><span class="line">		gpio_direction_output(ENET1_RESET, <span class="number">1</span>);</span><br><span class="line">		gpio_set_value(ENET1_RESET, <span class="number">0</span>);</span><br><span class="line">		mdelay(<span class="number">20</span>);</span><br><span class="line">		gpio_set_value(ENET1_RESET, <span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		imx_iomux_v3_setup_multiple_pads(fec2_pads,</span><br><span class="line">						 ARRAY_SIZE(fec2_pads));</span><br><span class="line">		gpio_direction_output(ENET2_RESET, <span class="number">1</span>);</span><br><span class="line">		gpio_set_value(ENET2_RESET, <span class="number">0</span>);</span><br><span class="line">		mdelay(<span class="number">20</span>);</span><br><span class="line">		gpio_set_value(ENET2_RESET, <span class="number">1</span>);</span><br><span class="line">	&#125;		</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>5、修改 drivers/net/phy/phy.c 文件中的函数 genphy_update_link</p>
+<p>添加代码进函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_PHY_SMSC</span></span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">int</span> lan8720_flag = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">int</span> bmcr_reg = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (lan8720_flag == <span class="number">0</span>) &#123;</span><br><span class="line">		bmcr_reg = phy_read(phydev, MDIO_DEVAD_NONE, MII_BMCR);</span><br><span class="line">		phy_write(phydev, MDIO_DEVAD_NONE, MII_BMCR, BMCR_RESET);</span><br><span class="line">		<span class="keyword">while</span>(phy_read(phydev, MDIO_DEVAD_NONE, MII_BMCR) &amp; <span class="number">0X8000</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			udelay(<span class="number">100</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		phy_write(phydev, MDIO_DEVAD_NONE, MII_BMCR, bmcr_reg);</span><br><span class="line">		lan8720_flag = <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<p>环境变量配置</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">setenv ipaddr <span class="number">192.168</span><span class="number">.0</span><span class="number">.122</span> <span class="comment">//开发板 IP 地址</span></span><br><span class="line">setenv ethaddr <span class="number">00</span>:<span class="number">04</span>:<span class="number">9f</span>:<span class="number">04</span>:d2:<span class="number">35</span> <span class="comment">//开发板网卡 MAC 地址</span></span><br><span class="line">setenv gatewayip <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span> <span class="comment">//开发板默认网关</span></span><br><span class="line">setenv netmask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> <span class="comment">//开发板子网掩码</span></span><br><span class="line">setenv serverip <span class="number">192.168</span><span class="number">.0</span><span class="number">.108</span> <span class="comment">//服务器地址，也就是 Ubuntu 地址</span></span><br><span class="line">saveenv <span class="comment">//保存环境变量</span></span><br></pre></td></tr></table></figure>
+<p>执行ping命令，能够成功ping到</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210226160214.png" alt="image-20210226160211357" /></p>
+<p>但是在Linux上ping192.168.0.55，却ping不成功    ？？？？</p>
+<p>更改CONFIG_FEC_ENET_DEV  这个宏 可以切换网口</p>
+<h4 id="其他修改"><a class="markdownIt-Anchor" href="#其他修改"></a> 其他修改</h4>
+<p>mx6ull_alientek_emmc.c</p>
+<p>更改板子信息 int checkboard(void)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">checkboard</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (is_mx6ull_9x9_evk())</span><br><span class="line"> 	   <span class="built_in">puts</span>(<span class="string">&quot;Board: MX6ULL 9x9 EVK\n&quot;</span>);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    	<span class="built_in">puts</span>(<span class="string">&quot;Board: MX6ULL KEPLER EMMC\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下载后验证</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210226162045.png" alt="image-20210226162043187" /></p>
+<h3 id="23-bootcmd-和-bootargs-环境变量"><a class="markdownIt-Anchor" href="#23-bootcmd-和-bootargs-环境变量"></a> 2.3 bootcmd 和 bootargs 环境变量</h3>
+<p>mx6ull_alientek_emmc.h 中 的 宏CONFIG_EXTRA_ENV_SETTINGS 保存着这些环境变量的默认值</p>
+<p>宏 CONFIG_EXTRA_ENV_SETTINGS 是个条件编译语句，使用 NAND 和 EMMC 的时候<br />
+宏 CONFIG_EXTRA_ENV_SETTINGS 的值是不同的。</p>
+<h4 id="环境变量-bootcmd"><a class="markdownIt-Anchor" href="#环境变量-bootcmd"></a> 环境变量 bootcmd</h4>
+<p>命令列表，为了启动内核</p>
+<h4 id="环境变量-bootargs"><a class="markdownIt-Anchor" href="#环境变量-bootargs"></a> 环境变量 bootargs</h4>
+<p>uboot提供参数给内核</p>
+<h3 id="24-uboot启动linux"><a class="markdownIt-Anchor" href="#24-uboot启动linux"></a> 2.4 uboot启动Linux</h3>
+<h4 id="emmc启动"><a class="markdownIt-Anchor" href="#emmc启动"></a> EMMC启动</h4>
+<p>查看EMMC里面是否有系统，Linux镜像zlmage和.dtb文件</p>
+<ul>
+<li>
+<p>mmc dev 1					// 切换到EMMC</p>
+</li>
+<li>
+<p>fatls mmc 1:1				// 查看emmc内容</p>
+</li>
+<li>
+<p>fatload mmc 1:1 80800000 zImage			//将zlmage加载到80800000</p>
+</li>
+<li>
+<p>fatload mmc 1:1 83000000 imx6ull-14x14-emmc-7-800x480-c.dtb <a target="_blank" rel="noopener" href="//xn--pet.xn--dtb83000000-z00rs94a1pb261nyk2h">//将.dtb文件加载到83000000</a></p>
+</li>
+<li>
+<p>bootz 80800000 - 83000000	//启动内核	注意空格</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210226181354.png" alt="image-20210226181352145" /></p>
+<p>如果内核启动成功，证明uboot支持EMMC启动</p>
+<h4 id="网络启动"><a class="markdownIt-Anchor" href="#网络启动"></a> 网络启动</h4>
+<ul>
+<li>tftp 80800000 zImage</li>
+<li>tftp 83000000 imx6ull-14x14-emmc-4.3-800x480-c.dtb</li>
+<li>bootz 80800000 - 83000000</li>
+</ul>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210226193745.png" alt="image-20210226193742071" /></p>
+<p>内核通过网络启动成功</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rowe</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://kepler23b.gitee.io/2021/02/26/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/U-Boot%E7%A7%BB%E6%A4%8D/">https://kepler23b.gitee.io/2021/02/26/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/U-Boot%E7%A7%BB%E6%A4%8D/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://kepler23b.gitee.io" target="_blank">Kepler23b</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.png" target="_blank"><img class="post-qr-code-img" src="/img/wechat.png" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li></ul></div></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2020/01/01/C++%E5%9F%BA%E7%A1%80/"><img class="next-cover" src="https://i.loli.net/2020/12/29/Qr7do4afk623KHu.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">c++基础</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-u-boot%E4%BD%BF%E7%94%A8"><span class="toc-number">1.</span> <span class="toc-text"> 1 U-Boot使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E5%88%9D%E6%AC%A1%E7%BC%96%E8%AF%91"><span class="toc-number">1.1.</span> <span class="toc-text"> 1.1 初次编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-%E7%83%A7%E5%86%99%E4%B8%8E%E5%90%AF%E5%8A%A8"><span class="toc-number">1.2.</span> <span class="toc-text"> 1.2 烧写与启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-u-boot%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8"><span class="toc-number">1.3.</span> <span class="toc-text"> 1.3 U-Boot命令使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E6%93%8D%E4%BD%9C"><span class="toc-number">1.3.1.</span> <span class="toc-text"> 网络操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-u-boot%E7%A7%BB%E6%A4%8D"><span class="toc-number">2.</span> <span class="toc-text"> 2 U-Boot移植</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-nxp%E5%AE%98%E6%96%B9%E5%BC%80%E5%8F%91%E6%9D%BFuboot%E7%BC%96%E8%AF%91%E6%B5%8B%E8%AF%95"><span class="toc-number">2.1.</span> <span class="toc-text"> 2.1 NXP官方开发板uboot编译测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E6%B7%BB%E5%8A%A0%E8%87%AA%E5%B7%B1%E7%9A%84%E5%BC%80%E5%8F%91%E6%9D%BF%E9%85%8D%E7%BD%AE"><span class="toc-number">2.2.</span> <span class="toc-text"> 2.2 添加自己的开发板配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.1.</span> <span class="toc-text"> 增加默认配置文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%BC%80%E5%8F%91%E6%9D%BF%E5%AF%B9%E5%BA%94%E7%9A%84%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.2.</span> <span class="toc-text"> 添加开发板对应的头文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E6%9D%BF%E7%BA%A7%E6%96%87%E4%BB%B6%E5%A4%B9"><span class="toc-number">2.2.3.</span> <span class="toc-text"> 添加板级文件夹</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9u-boot%E5%9B%BE%E5%BD%A2%E7%95%8C%E9%9D%A2%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.4.</span> <span class="toc-text"> 修改U-Boot图形界面配置文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B0%E6%B7%BB%E5%8A%A0%E7%9A%84%E6%9D%BF%E5%AD%90%E9%85%8D%E7%BD%AE%E7%BC%96%E8%AF%91uboot"><span class="toc-number">2.2.5.</span> <span class="toc-text"> 使用新添加的板子配置编译uboot</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#lcd-%E9%A9%B1%E5%8A%A8%E4%BF%AE%E6%94%B9"><span class="toc-number">2.2.6.</span> <span class="toc-text"> LCD 驱动修改</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E9%A9%B1%E5%8A%A8%E4%BF%AE%E6%94%B9"><span class="toc-number">2.2.7.</span> <span class="toc-text"> 网络驱动修改</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E4%BF%AE%E6%94%B9"><span class="toc-number">2.2.8.</span> <span class="toc-text"> 其他修改</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-bootcmd-%E5%92%8C-bootargs-%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.3.</span> <span class="toc-text"> 2.3 bootcmd 和 bootargs 环境变量</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F-bootcmd"><span class="toc-number">2.3.1.</span> <span class="toc-text"> 环境变量 bootcmd</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F-bootargs"><span class="toc-number">2.3.2.</span> <span class="toc-text"> 环境变量 bootargs</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-uboot%E5%90%AF%E5%8A%A8linux"><span class="toc-number">2.4.</span> <span class="toc-text"> 2.4 uboot启动Linux</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#emmc%E5%90%AF%E5%8A%A8"><span class="toc-number">2.4.1.</span> <span class="toc-text"> EMMC启动</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E5%90%AF%E5%8A%A8"><span class="toc-number">2.4.2.</span> <span class="toc-text"> 网络启动</span></a></li></ol></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Rowe</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> {preloader.endLoading()})</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'RiH3aqpXtXSQRgRyiCiep9RP-gzGzoHsz',
+      appKey: '0y9T1JOKvO6itNxJBcMwQq5g',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: true,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign({}, initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.querySelector('#vcomment'),loadValine)
+  else setTimeout(() => loadValine(), 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div class="aplayer no-destroy" data-id="5383178516" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/gh/metowolf/MetingJS@1.2/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config_change',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', '', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})</script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","hOffset":0,"vOffset":-20,"width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.9},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
