@@ -210,6 +210,81 @@
     </entry>
     
     
+    
+    <entry>
+      <title>Nginx基本概念</title>
+      <link href="2020/01/01/Nginx_notes/Nginx%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"/>
+      <url>2020/01/01/Nginx_notes/Nginx%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="1-nginx简介"><a class="markdownIt-Anchor" href="#1-nginx简介"></a> 1 Nginx简介</h2><p>1、什么是Nginx？<a href="https://baike.baidu.com/item/nginx">百度百科</a></p><p><em>Nginx</em> (engine x) 是一个高性能的<a href="https://baike.baidu.com/item/HTTP">HTTP</a>和<a href="https://baike.baidu.com/item/%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/7793488">反向代理</a>web服务器</p><p>专为性能优化而开发</p><p>具有很高的稳定性</p><h2 id="2-反向代理"><a class="markdownIt-Anchor" href="#2-反向代理"></a> 2 反向代理</h2><p>正向代理：</p><ul><li>在客户端（浏览器）配置代理服务器，通过代理服务器进行互联网访问</li></ul><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228151428.png" alt="image-20210228151424602" /></p><p>反向代理：</p><p>将请求发送到反向代理服务器，由反向代理服务器去选择目标服务器获取数据后，再返回给客户端，此时反向代理服务器和目标服务器对外就是一个服务器，暴露的是代理服务器地址，隐藏了真实服务器IP地址。</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228152559.png" alt="image-20210228152515695" /></p><h2 id="3-负载均衡"><a class="markdownIt-Anchor" href="#3-负载均衡"></a> 3 负载均衡</h2><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228153403.png" alt="image-20210228153401019" /></p><p>单个服务器解决不了，我们增加服务器的数量，然后将请求分发到各个服务器上，将原先请求集中到单个服务器上的情况改为将请求分发到多个服务器上，将负载分发到不同的服务器，也就是我们所说的负载均衡</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228153651.png" alt="image-20210228153648503" /></p><h2 id="4-动静分离"><a class="markdownIt-Anchor" href="#4-动静分离"></a> 4 动静分离</h2><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228154233.png" alt="单一服务器访问资源" /></p><p>为了加快网站的解析速度，可以把动态页面和静态页面由不同的服务器来解析，加快解析速度。降低原来单个服务器的压力。</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228154516.png" alt="image-20210228154512191" /></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> web服务器 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Nginx </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Nginx安装、常用命令以及配置</title>
+      <link href="2020/01/01/Nginx_notes/Nginx%E5%AE%89%E8%A3%85%E3%80%81%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%92%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+      <url>2020/01/01/Nginx_notes/Nginx%E5%AE%89%E8%A3%85%E3%80%81%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%92%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="1-安装"><a class="markdownIt-Anchor" href="#1-安装"></a> 1 安装</h2><p>官网下载：</p><p>先安装nginx相关的依赖</p><ul><li><p>pcre</p></li><li><p>openssl</p></li><li><p>zlib</p></li><li><p>nginx</p></li></ul><p>安装三步骤</p><ul><li>解压 -zxvf -jxvf</li><li>配置 执行配置脚本 bash 配置脚本</li><li>make</li><li>make install</li></ul><p>依次安装上面的依赖库包</p><p>最终在/usr/local/nginx/sbin/文件下存在一个nginx脚本可以用来启动nginx</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228174515.png" alt="image-20210228174513353" /></p><p>成功启动</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228192508.png" alt="image-20210228192505066" /></p><p>在阿里云服务器上添加允许80端口访问，就可以成功访问到上面的页面了。</p><h2 id="2-常用命令"><a class="markdownIt-Anchor" href="#2-常用命令"></a> 2 常用命令</h2><p>必须进入 /usr./local/nginx/sbin目录下</p><ul><li><p>查看版本号</p><p>./nginx -v</p></li><li><p>关闭nginx</p><p>./nginx -s stop</p></li><li><p>开启nginx</p><p>./nginx</p></li><li><p>查看进程</p><p>ps -ef |grep nginx</p></li><li><p>重新加载nginx nginx.conf   加载文件</p><p>./nginx -s reload</p></li></ul><h2 id="3-配置文件"><a class="markdownIt-Anchor" href="#3-配置文件"></a> 3 配置文件</h2><h3 id="配置文件的位置"><a class="markdownIt-Anchor" href="#配置文件的位置"></a> 配置文件的位置</h3><p>usr/local/nginx/conf/nginx.conf</p><h3 id="配置组成"><a class="markdownIt-Anchor" href="#配置组成"></a> 配置组成</h3><p><strong>全局块</strong></p><p>从配置文件开始到events块之间的内容，主要会设置一些影响 nginx服务器整体运行的配置指令</p><p>worker_processes  1;  并发数</p><p><strong>evens块</strong></p><p>events块涉及的指令主要影响Nginx服务器与用户的网络连接</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228193858.png" alt="image-20210228193855772" /></p><p>最大连接数</p><p><strong>http块</strong></p><p>配置最频繁的部分。</p><ul><li>http全局块</li></ul><p>包含的</p><ul><li>server块</li></ul><p>和虚拟主机有很大的关系。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> web服务器 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Nginx </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Nginx安装、常用命令以及配置</title>
+      <link href="2020/01/01/Nginx_notes/Nginx%E9%85%8D%E7%BD%AE%E5%AE%9E%E4%BE%8B/"/>
+      <url>2020/01/01/Nginx_notes/Nginx%E9%85%8D%E7%BD%AE%E5%AE%9E%E4%BE%8B/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="反向代理"><a class="markdownIt-Anchor" href="#反向代理"></a> 反向代理</h2><h3 id="实例1windows进行访问"><a class="markdownIt-Anchor" href="#实例1windows进行访问"></a> 实例1：windows进行访问</h3><p>实现效果</p><p>打开浏览器，<a href="http://xn--www-0v1e42u56awbb6lc4448byfnmk1gl7q.123.com">在浏览器地址栏输入地址www.123.com</a>，跳转到Linux系统下的tomcat主页面中。</p><p>准备工作</p><p>在Linux中安装tomcat，使用默认端口8080</p><ul><li>下载压缩包</li></ul><p><a href="https://tomcat.apache.org/download-80.cgi">下载链接</a></p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228205744.png" alt="image-20210228205742449" /></p><ul><li>解压</li></ul><p>选择已经编译好了的版本，放在服务器/usr/src/下</p><p><code>sudo tar -zxvf apache-tomcat-8.5.63.tar.gz</code></p><p>解压成功后，不需要编译，就可以直接使用</p><ul><li>开启服务</li></ul><p>运行脚本 ./startup.sh</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228210336.png" alt="image-20210228210334725" /></p><p>在服务器打开端口8080，允许外界访问</p><ul><li>阿里云安全组增加规则</li></ul><p>实例1：windows进行访问</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228212644.png" alt="image-20210228212641524" /></p><p>host文件地址</p><p>C:\Windows\System32\drivers\etc</p><p>39.108.249.43<a href="http://www.123.com">www.123.com</a></p><p>在nginx里面修改配置文件nginx.conf</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210228222929.png" alt="image-20210228222927144" /></p><p>反向代理已经完成</p><h3 id="实例2"><a class="markdownIt-Anchor" href="#实例2"></a> 实例2：</h3><p>1、实现效果</p><p>使用nginx反向代理，根据访问的路径，跳转到不同端口的服务中去，nginx监听端口为9001</p><p>访问http://127.0.0.1:9001/edu/ 直接跳转到127.0.0.1:8081</p><p>访问http://127.0.0.1:9001/vod/ 直接跳转到127.0.0.1:8082</p><p>2、准备工作</p><p>ps -ef | grep tomcat 查看进程</p><p>kill -9 - 查询到的进程号</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> web服务器 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Nginx </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
   
   
 </search>
