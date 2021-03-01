@@ -285,6 +285,31 @@
     </entry>
     
     
+    
+    <entry>
+      <title>U-Boot图形化配置及其原理</title>
+      <link href="2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/U-Boot%E5%9B%BE%E5%BD%A2%E5%8C%96%E9%85%8D%E7%BD%AE%E5%8F%8A%E5%85%B6%E5%8E%9F%E7%90%86/"/>
+      <url>2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/U-Boot%E5%9B%BE%E5%BD%A2%E5%8C%96%E9%85%8D%E7%BD%AE%E5%8F%8A%E5%85%B6%E5%8E%9F%E7%90%86/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>uboot可以通过 mx6ull_alientek_emmc_defconfig 来配置，或者通过文件mx6ull_alientek_emmc.h 来配置 。还可以通过图形化配置，下面从U-Boot图形化配置体验、menuconfig 图形化配置原理、添加自定义菜单三个方面来进行介绍。重点要学会使用，再学习原理，再深入学习菜单。</p><h2 id="1-u-boot图形化配置体验"><a class="markdownIt-Anchor" href="#1-u-boot图形化配置体验"></a> 1 U-Boot图形化配置体验</h2><p>Ubuntu 中安装 ncurses 库</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install build-essential</span><br><span class="line">sudo apt-get install libncurses5-dev</span><br></pre></td></tr></table></figure><p>使用“make xxx_defconfig”对 uboot 进行一次默认配置</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- mx6ull_alientek_emmc_defconfig</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig</span><br></pre></td></tr></table></figure><p>进入图形界面</p><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210226205456.png" alt="image-20210226205454076" /></p><ul><li>键盘上的“↑”和“↓”键来选择要配置的菜单</li><li>“Enter”键进入子菜单</li><li>在键盘上按下高亮字母对应的键可以快速选中对应的菜单</li><li>按下“Y”键就会将相应的代码编译进 Uboot 中，菜单前面变为“&lt; * &gt;”</li><li>按下“N”键不编译相应的代码，“[ ]”默认表示不编译</li><li>按下“M”键就会将相应的代码编译为模块，菜单前面变为“&lt; M &gt;”</li><li>按两下“Esc”键退出，也就是返回到上一级</li><li>按下“?”键查看此菜单的帮助信息</li><li>按下“/”键打开搜索框</li></ul><p>配置界面下有五个按钮，功能如下：</p><ul><li>&lt;Select&gt;:选中按钮，和“Enter”键的功能相同，负责选中并进入某个菜单。</li><li>&lt;Exit&gt;：退出按钮，和按两下“Esc”键功能相同，退出当前菜单，返回到上一级。</li><li>&lt;Help&gt;：帮助按钮，查看选中菜单的帮助信息。</li><li>&lt;Save&gt;：保存按钮，保存修改后的配置文件。</li><li>&lt;Load&gt;：加载按钮，加载指定的配置文件。</li></ul><p>直接在 mx6ull_alientek_emmc.h 中定义的宏，配置 不会导入到图形配置里面去，只会读取.config文件。</p><p>配置完成后，相应的.config文件会发生更改。</p><p>完成配置之后 不能再执行mx6ull_alientek_emmc.sh  脚本，因为脚本会导入默认配置。</p><p>此时应该使用下面的命令进行编译：</p><p><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j2</code></p><p>以dns  命令为例子，进行图形配置</p><ul><li>“Command line interface —&gt;”<ul><li>“Network commands—&gt;”<ul><li>“dns”</li></ul></li></ul></li></ul><p>选中dns，按下键盘&quot;Y&quot;，dns 前面的“[ ]”变成了“[ * ]”  ，查看.config，发现多了“CONFIG_CMD_DNS=y”这一行（323）</p><p>使用dns命令</p><p>先设置一下 dns 服务器的 IP 地址，也就是设置环境变量 dnsip的值</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">setenv dnsip 114.114.114.114</span><br><span class="line">saveenv</span><br><span class="line"></span><br><span class="line">dns www.baidu.com</span><br></pre></td></tr></table></figure><p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210227002407.png" alt="image-20210227002405354" /></p><p>这简直十分方便了，不需要自己去配置宏，直接图形配置使能一些命令。</p><h2 id="2-menuconfig-图形化配置原理"><a class="markdownIt-Anchor" href="#2-menuconfig-图形化配置原理"></a> 2 menuconfig 图形化配置原理</h2><h3 id="21-make-menuconfig-过程分析"><a class="markdownIt-Anchor" href="#21-make-menuconfig-过程分析"></a> 2.1 make menuconfig 过程分析</h3><p>输入make menuconfig  会匹配到顶层Makefile</p><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">%config: scripts_basic outputmakefile FORCE</span></span><br><span class="line"><span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=scripts/kconfig <span class="variable">$@</span></span><br></pre></td></tr></table></figure><h3 id="22-kconfig-语法简介"><a class="markdownIt-Anchor" href="#22-kconfig-语法简介"></a> 2.2 Kconfig 语法简介</h3><h2 id="3-添加自定义菜单"><a class="markdownIt-Anchor" href="#3-添加自定义菜单"></a> 3 添加自定义菜单</h2>]]></content>
+      
+      
+      <categories>
+          
+          <category> 嵌入式Linux驱动开发笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> I.MX6U </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
   
   
 </search>
