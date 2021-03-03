@@ -1,0 +1,481 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>根文件系统构建 | Kepler23b</title><meta name="keywords" content="I.MX6U"><meta name="author" content="Rowe"><meta name="copyright" content="Rowe"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="记录根文件系统的构建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="根文件系统构建">
+<meta property="og:url" content="https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9E%84%E5%BB%BA/index.html">
+<meta property="og:site_name" content="Kepler23b">
+<meta property="og:description" content="记录根文件系统的构建">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kepler23b.gitee.io/img/fm.jpg">
+<meta property="article:published_time" content="2020-01-01T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-03T15:54:19.905Z">
+<meta property="article:author" content="Rowe">
+<meta property="article:tag" content="I.MX6U">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kepler23b.gitee.io/img/fm.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9E%84%E5%BB%BA/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: true
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-03-03 23:54:19'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}const fontSizeVal = saveToLocal.get('global-font-size')
+if (fontSizeVal !== undefined) {
+  document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+}})()</script><link rel="stylesheet" href="//at.alicdn.com/t/font_2272646_jy3vlys7ayt.css"><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/kaila.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw iconfont icon-liuyanban1"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/fm.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Kepler23b</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw iconfont icon-liuyanban1"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">根文件系统构建</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-01-01T04:00:00.000Z" title="发表于 2020-01-01 12:00:00">2020-01-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-03-03T15:54:19.905Z" title="更新于 2021-03-03 23:54:19">2021-03-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/">嵌入式Linux驱动开发笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="1-根文件系统简介"><a class="markdownIt-Anchor" href="#1-根文件系统简介"></a> 1 根文件系统简介</h2>
+<p>根文件系统首先是内核启动时所 mount(挂载)的第一个文件系统，内核代码映像文件保存在<br />
+根文件系统中，而系统引导启动程序会在根文件系统挂载之后从中把一些基本的初始化脚本和<br />
+服务等加载到内存中去运行。</p>
+<p>嵌入式 Linux 并没有将内核代码镜像保存在根文件系统，保存在了NAND Flash 的指定存储地址或者EMMC 专用分区 。</p>
+<p>这个笔记提供Linux 运行的最小根文件系统，里面包含一些常用的Linux命令。后续可以根据实际工作需求进行添加。</p>
+<p>Ubuntu根文件系统</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210302231948.png" alt="image-20210302231943970" /></p>
+<p>讲解常用的子目录：</p>
+<p>1、/bin 目录</p>
+<p>存放一些可执行文件。所有的账户都可以使用。</p>
+<p>2、/dev 目录</p>
+<p>此目录下的文件都是和设备有关的，此目录下的文件都是设备文件。  硬件设备也是以文件的形式存在。</p>
+<p>例如操作串口的文件：/dev/ttymxc0</p>
+<p>3、/etc 目录</p>
+<p>此目录下存放着各种配置文件，大家可以进入 Ubuntu 的 etc 目录看一下，里面的配置文件非常多！</p>
+<p>4、/lib 目录</p>
+<p>此目录下存放着 Linux 所必须的库文件。这些库文件是共享库，命令和用户编写的应用程序要使用这些库文件。</p>
+<p>5、/mnt 目录</p>
+<p>临时挂载目录，一般是空目录，可以在此目录下创建空的子目录，比如/mnt/sd、 /mnt/usb，这样就可以将 SD 卡或者 U 盘挂载到/mnt/sd 或者/mnt/usb 目录中。</p>
+<p>6、 /proc 目录</p>
+<p>此目录一般是空的，当 Linux 系统启动以后会将此目录作为 proc 文件系统的挂载点， proc是个虚拟文件系统，没有实际的存储设备。 proc 里面的文件都是临时存在的，一般用来存储系统运行信息文件。</p>
+<p>7、 /usr 目录</p>
+<p>Unix Software Resource 的缩写，也就是 Unix 操作系统软件资源目录。  既然是软件资源目录，因此/usr 目录下也存放着很多软件，一般系统安装完成以后此目录占用的空间最多。</p>
+<p>8、 /var 目录</p>
+<p>此目录存放一些可以改变的数据</p>
+<p>9、 /sbin 目录</p>
+<p>此目录页用户存放一些可执行文件，但是此目录下的文件或者说命令只有管理员才能使用，主要用户系统管理。</p>
+<p>10、 /sys 目录</p>
+<p>系统启动以后此目录作为 sysfs 文件系统的挂载点， sysfs 是一个类似于 proc 文件系统的特殊文件系统， sysfs 也是基于 ram 的文件系统，也就是说它也没有实际的存储设备。此目录是系统设备管理的重要目录，此目录通过一定的组织结构向用户提供详细的内核数据结构信息。</p>
+<p>11、 /opt</p>
+<p>可选的文件、软件存放区，由用户选择将哪些文件或软件放到此目录中。</p>
+<h2 id="2-busybox-构建根文件系统"><a class="markdownIt-Anchor" href="#2-busybox-构建根文件系统"></a> 2 BusyBox 构建根文件系统</h2>
+<h3 id="21-busybox-简介"><a class="markdownIt-Anchor" href="#21-busybox-简介"></a> 2.1 BusyBox 简介</h3>
+<p>BusyBox 是一个集成了大量的 Linux 命令和工具的软件，像 ls、 mv、 ifconfig 等命令 BusyBox 都会提供。 BusyBox 就是一个大的工具箱，这个工具箱里面集成了 Linux 的许多工具和命令。一般下载 BusyBox 的<strong>源码</strong>，<br />
+然后配置 BusyBox，选择自己想要的功能，最后编译即可。</p>
+<p><a target="_blank" rel="noopener" href="https://busybox.net/">官网地址</a></p>
+<p>使用1.29.0 版本的 BusyBox</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210302233205.png" alt="image-20210302233201795" /></p>
+<h3 id="22-编译-busybox-构建根文件系统"><a class="markdownIt-Anchor" href="#22-编译-busybox-构建根文件系统"></a> 2.2 编译 BusyBox 构建根文件系统</h3>
+<p>Linux驱动开发都是通过，nfs挂载根文件系统，最终才会烧写到EMMC中。</p>
+<p>需要在nfs文件夹下添加文件夹</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210302234120.png" alt="image-20210302234117124" /></p>
+<p>1、修改Makefile 添加编译器</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210302234638.png" alt="image-20210302234635045" /></p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210302234714.png" alt="image-20210302234710650" /></p>
+<p>2、busybox 中文字符支持</p>
+<p>修改busybox-1.29.0/libbb/printable_string.c  中的 函数 printable_string</p>
+<p>第 31 和 32 行，当字符大于 0X7F 以后就跳出去了。<br />
+第 45 和 46 行，如果支持 UNICODE 码的话，当字符大于 0X7F 就直接输出‘?’</p>
+<p>修改两处的代码为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">33 &#x2F;* if (c &gt;&#x3D; 0x7f)</span><br><span class="line">34 		break; *&#x2F;</span><br><span class="line"></span><br><span class="line">48 &#x2F;* if (c &lt; &#39; &#39; || c &gt;&#x3D; 0x7f) *&#x2F;</span><br><span class="line">49 if( c &lt; &#39; &#39;)</span><br></pre></td></tr></table></figure>
+<p>修改busybox-1.29.0/libbb/unicode.c</p>
+<p>第 1022 行，当字符大于 0X7F 以后， *d++就为‘?’。<br />
+第 1030 和 1031 行，当字符大于 0X7F 以后， *d 也为‘?’</p>
+<p>修改以上两处</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">……</span><br><span class="line"><span class="number">1022</span> <span class="comment">/* 修改下面一行代码 */</span></span><br><span class="line"><span class="number">1023</span> <span class="comment">/* *d++ = (c &gt;= &#x27; &#x27; &amp;&amp; c &lt; 0x7f) ? c : &#x27;?&#x27;; */</span></span><br><span class="line"><span class="number">1024</span> *d++ = (c &gt;= <span class="string">&#x27; &#x27;</span>) ? c : <span class="string">&#x27;?&#x27;</span>;</span><br><span class="line">……</span><br><span class="line"><span class="number">1032</span> <span class="comment">/* 修改下面一行代码 */</span></span><br><span class="line"><span class="number">1033</span> <span class="comment">/* if (c &lt; &#x27; &#x27; || c &gt;= 0x7f) */</span></span><br><span class="line"><span class="number">1034</span> <span class="keyword">if</span>(c &lt; <span class="string">&#x27; &#x27;</span>)</span><br><span class="line">……</span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303000642.png" alt="image-20210303000640368" /></p>
+<p>最后需要配置使能unicode 码</p>
+<p>3、配置 busybox</p>
+<p>三种配置</p>
+<p>①、 defconfig，缺省配置，也就是默认配置选项。<br />
+②、 allyesconfig，全选配置，也就是选中 busybox 的所有功能。</p>
+<p>③、 allnoconfig，最小配置。</p>
+<p>一般使用默认配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make defconfig</span><br><span class="line">make menuconfig</span><br></pre></td></tr></table></figure>
+<p>配置路径</p>
+<p>Location:<br />
+-&gt; Settings<br />
+-&gt; Build static binary (no shared libs)</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303001151.png" alt="image-20210303001149254" /></p>
+<p>不要配置 “Build static binary (no shared libs)”   不编译这个。</p>
+<p>配置</p>
+<p>Location:<br />
+-&gt; Settings<br />
+-&gt; vi-style line editing commands</p>
+<p>编译此项</p>
+<p>配置</p>
+<p>Location:<br />
+-&gt; Linux Module Utilities<br />
+-&gt; Simplified modutils</p>
+<p>取消配置此项</p>
+<p>配置</p>
+<p>Location:<br />
+-&gt; Linux System Utilities<br />
+-&gt; mdev (16 kb) //确保下面的全部选中，默认都是选中的</p>
+<p>使能配置 使能unicode 编码以支持中文</p>
+<p>Location:<br />
+-&gt; Settings</p>
+<p>​		-&gt; Support Unicode																						// 选中</p>
+<p>​			-&gt; Check $LC_ALL, $LC_CTYPE and $LANG environment variables 	// 选中</p>
+<p>编译busybox</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make</span><br><span class="line">make install CONFIG_PREFIX=/home/kepler/Linux/nfs/rootfs</span><br></pre></td></tr></table></figure>
+<p>rootfs 目录下有 bin、 sbin 和 usr 这三个目录，以及 linuxrc 这个文件。</p>
+<h3 id="23-向rootfs的lib目录添加库文件"><a class="markdownIt-Anchor" href="#23-向rootfs的lib目录添加库文件"></a> 2.3 向rootfs的&quot;/lib&quot;目录添加库文件</h3>
+<p>1、向 rootfs 的“/lib”目录添加库文件</p>
+<p>拷贝/usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linuxgnueabihf/libc/lib   的文件到 rootfs/lib</p>
+<p><code>cp *so* *.a /home/kepler/Linux/nfs/rootfs/lib/ -d</code></p>
+<p>再拷贝</p>
+<p>/usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/lib   的文件</p>
+<p><code>cp *so* *.a /home/kepler/Linux/nfs/rootfs/lib/ -d</code></p>
+<p>2、向 rootfs 的“usr/lib”目录添加库文件</p>
+<p>拷贝/usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/<br />
+usr/lib</p>
+<p><code>cp *so* *.a /home/kepler/Linux/nfs/rootfs/usr/lib/ -d</code></p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303012514.png" alt="image-20210303012512486" /></p>
+<p>查看两个目录的大小</p>
+<h3 id="24-创建其他文件夹"><a class="markdownIt-Anchor" href="#24-创建其他文件夹"></a> 2.4 创建其他文件夹</h3>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303012649.png" alt="image-20210303012647700" /></p>
+<h2 id="3-根文件系统的测试"><a class="markdownIt-Anchor" href="#3-根文件系统的测试"></a> 3 根文件系统的测试</h2>
+<p>使用NFS挂载</p>
+<p>重新设置 bootargs 环境变量</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setenv bootargs <span class="string">&#x27;console=ttymxc0,115200 root=/dev/nfs nfsroot=192.168.0.102:/home/kepler/Linux/nfs/rootfs,proto=tcp rw ip=192.168.0.55:192.168.0.102:192.168.0.1:255.255.255.0::eth0:off&#x27;</span> //设置 bootargs</span><br><span class="line">saveenv //保存环境变量</span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303221026.png" alt="image-20210303221022606" /></p>
+<p>测试成功，但是显示没有rcS文件</p>
+<h2 id="4-完善根文件系统"><a class="markdownIt-Anchor" href="#4-完善根文件系统"></a> 4 完善根文件系统</h2>
+<ul>
+<li>创建/etc/init.d/rcS 文件</li>
+</ul>
+<p>rcS中，规定内核启动后启动哪些服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">PATH=/sbin:/bin:/usr/sbin:/usr/bin:<span class="variable">$PATH</span></span><br><span class="line">LD_LIBRARY_PATH=<span class="variable">$LD_LIBRARY_PATH</span>:/lib:/usr/lib</span><br><span class="line"><span class="built_in">export</span> PATH LD_LIBRARY_PATH</span><br><span class="line"></span><br><span class="line">mount -a		<span class="comment"># 自动挂载</span></span><br><span class="line">mkdir /dev/pts</span><br><span class="line">mount -t devpts devpts /dev/pts</span><br><span class="line"><span class="built_in">echo</span> /sbin/mdev &gt; /proc/sys/kernel/hotplug</span><br><span class="line">mdev -s</span><br></pre></td></tr></table></figure>
+<p>在开发板的根文件系统中创建上面的文件，reboot重启开发板</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303223811.png" alt="image-20210303223808325" /></p>
+<p>显示没有etc/fstab 文件</p>
+<ul>
+<li>创建/etc/fstab 文件   自动挂载文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#&lt;file system&gt; &lt;mount point&gt; &lt;type&gt; &lt;options&gt; &lt;dump&gt; &lt;pass&gt;</span><br><span class="line">proc 		   &#x2F;proc         proc   defaults   0 	 0</span><br><span class="line">tmpfs 		   &#x2F;tmp 		 tmpfs  defaults   0     0</span><br><span class="line">sysfs 		   &#x2F;sys 	     sysfs 	defaults   0 	 0</span><br></pre></td></tr></table></figure>
+<p>重启一下开发板</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303224950.png" alt="image-20210303224947451" /></p>
+<p>无错误提示了</p>
+<ul>
+<li>创建/etc/inittab 文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#etc&#x2F;inittab</span><br><span class="line">::sysinit:&#x2F;etc&#x2F;init.d&#x2F;rcS</span><br><span class="line">console::askfirst:-&#x2F;bin&#x2F;sh</span><br><span class="line">::restart:&#x2F;sbin&#x2F;init</span><br><span class="line">::ctrlaltdel:&#x2F;sbin&#x2F;reboot</span><br><span class="line">::shutdown:&#x2F;bin&#x2F;umount -a -r</span><br><span class="line">::shutdown:&#x2F;sbin&#x2F;swapoff -a</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>系统启动以后运行/etc/init.d/rcS 这个脚本文件。</li>
+<li>将 console 作为控制台终端，也就是 ttymxc0。</li>
+<li>重启的话运行/sbin/init。</li>
+<li>按下 ctrl+alt+del 组合键的话就运行/sbin/reboot，看来 ctrl+alt+del 组合键用于重<br />
+启系统。</li>
+<li>关机的时候执行/bin/umount，也就是卸载各个文件系统。</li>
+<li>关机的时候执行/sbin/swapoff，也就是关闭交换分区。</li>
+</ol>
+<p>重启开发板</p>
+<h2 id="5-根文件系统其他测试"><a class="markdownIt-Anchor" href="#5-根文件系统其他测试"></a> 5 根文件系统其他测试</h2>
+<h3 id="51-软件运行"><a class="markdownIt-Anchor" href="#51-软件运行"></a> 5.1 软件运行</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;hello word&quot;</span>);</span><br><span class="line">        sleep(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303231109.png" alt="image-20210303231106328" /></p>
+<p>用交叉编译器编译之后，只能在开发板执行，Ubuntu下不能执行</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303233257.png" alt="image-20210303233255277" /></p>
+<p>开发板成功执行</p>
+<p>ps看进程</p>
+<p>./hello &amp; 后台执行</p>
+<p>kill -9 PID 杀死进程</p>
+<h3 id="52-中文字符测试"><a class="markdownIt-Anchor" href="#52-中文字符测试"></a> 5.2 中文字符测试</h3>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303233903.png" alt="image-20210303233901450" /></p>
+<h3 id="53-开机启动测试"><a class="markdownIt-Anchor" href="#53-开机启动测试"></a> 5.3 开机启动测试</h3>
+<p>将hello加入 /etc/init.d/rcS 文件</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303234351.png" alt="image-20210303234348549" /></p>
+<h3 id="54-外网连接测试"><a class="markdownIt-Anchor" href="#54-外网连接测试"></a> 5.4 外网连接测试</h3>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303234529.png" alt="image-20210303234526883" /></p>
+<p>显示错误，需要解析这个域名</p>
+<p>新建文件/etc/resolv.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nameserver 114.114.114.114</span><br><span class="line">nameserver 192.168.0.1</span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303234850.png" alt="image-20210303234847815" /></p>
+<p>可以访问到外网</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rowe</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9E%84%E5%BB%BA/">https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9E%84%E5%BB%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://kepler23b.gitee.io" target="_blank">Kepler23b</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/I-MX6U/">I.MX6U</a></div><div class="post_share"><div class="social-share" data-image="/img/fm.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.png" target="_blank"><img class="post-qr-code-img" src="/img/wechat.png" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li></ul></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/MigTool%E7%83%A7%E5%86%99%E5%B7%A5%E5%85%B7%E8%AF%A6%E8%A7%A3/"><img class="prev-cover" src="/img/fm.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">嵌入式Linux系统烧写</div></div></a></div><div class="next-post pull-right"><a href="/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/Linux%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E5%92%8C%E7%A7%BB%E6%A4%8D/"><img class="next-cover" src="/img/fm.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Linux内核编译和移植</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/01/01/嵌入式Linux_Notes/I.MX6U点灯c语言/" title="I.MX6U点灯（c语言）"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">I.MX6U点灯（c语言）</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/通用驱动开发格式/" title="I.MX6U通用驱动开发格式"><img class="cover" src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20201231231314.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">I.MX6U通用驱动开发格式</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/U-Boot移植/" title="U-Boot使用和移植"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">U-Boot使用和移植</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/U-Boot图形化配置及其原理/" title="U-Boot图形化配置及其原理"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">U-Boot图形化配置及其原理</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/MigTool烧写工具详解/" title="嵌入式Linux系统烧写"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">嵌入式Linux系统烧写</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/Linux内核编译和移植/" title="Linux内核编译和移植"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">Linux内核编译和移植</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text"> 1 根文件系统简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-busybox-%E6%9E%84%E5%BB%BA%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-number">2.</span> <span class="toc-text"> 2 BusyBox 构建根文件系统</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-busybox-%E7%AE%80%E4%BB%8B"><span class="toc-number">2.1.</span> <span class="toc-text"> 2.1 BusyBox 简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E7%BC%96%E8%AF%91-busybox-%E6%9E%84%E5%BB%BA%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-number">2.2.</span> <span class="toc-text"> 2.2 编译 BusyBox 构建根文件系统</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E5%90%91rootfs%E7%9A%84lib%E7%9B%AE%E5%BD%95%E6%B7%BB%E5%8A%A0%E5%BA%93%E6%96%87%E4%BB%B6"><span class="toc-number">2.3.</span> <span class="toc-text"> 2.3 向rootfs的&quot;&#x2F;lib&quot;目录添加库文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-%E5%88%9B%E5%BB%BA%E5%85%B6%E4%BB%96%E6%96%87%E4%BB%B6%E5%A4%B9"><span class="toc-number">2.4.</span> <span class="toc-text"> 2.4 创建其他文件夹</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%B5%8B%E8%AF%95"><span class="toc-number">3.</span> <span class="toc-text"> 3 根文件系统的测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%AE%8C%E5%96%84%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-number">4.</span> <span class="toc-text"> 4 完善根文件系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%85%B6%E4%BB%96%E6%B5%8B%E8%AF%95"><span class="toc-number">5.</span> <span class="toc-text"> 5 根文件系统其他测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#51-%E8%BD%AF%E4%BB%B6%E8%BF%90%E8%A1%8C"><span class="toc-number">5.1.</span> <span class="toc-text"> 5.1 软件运行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#52-%E4%B8%AD%E6%96%87%E5%AD%97%E7%AC%A6%E6%B5%8B%E8%AF%95"><span class="toc-number">5.2.</span> <span class="toc-text"> 5.2 中文字符测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#53-%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8%E6%B5%8B%E8%AF%95"><span class="toc-number">5.3.</span> <span class="toc-text"> 5.3 开机启动测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#54-%E5%A4%96%E7%BD%91%E8%BF%9E%E6%8E%A5%E6%B5%8B%E8%AF%95"><span class="toc-number">5.4.</span> <span class="toc-text"> 5.4 外网连接测试</span></a></li></ol></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Rowe</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> {preloader.endLoading()})</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'RiH3aqpXtXSQRgRyiCiep9RP-gzGzoHsz',
+      appKey: '0y9T1JOKvO6itNxJBcMwQq5g',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: true,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign({}, initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.querySelector('#vcomment'),loadValine)
+  else setTimeout(() => loadValine(), 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div class="aplayer no-destroy" data-id="5383178516" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/gh/metowolf/MetingJS@1.2/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config_change',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', '', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})</script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","hOffset":0,"vOffset":-20,"width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.9},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
