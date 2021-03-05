@@ -1,0 +1,389 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>字符设备驱动 | Kepler23b</title><meta name="keywords" content="I.MX6U"><meta name="author" content="Rowe"><meta name="copyright" content="Rowe"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="记录字符设备框架">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动">
+<meta property="og:url" content="https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6/index.html">
+<meta property="og:site_name" content="Kepler23b">
+<meta property="og:description" content="记录字符设备框架">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kepler23b.gitee.io/img/fm.jpg">
+<meta property="article:published_time" content="2020-01-01T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-05T13:30:57.727Z">
+<meta property="article:author" content="Rowe">
+<meta property="article:tag" content="I.MX6U">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kepler23b.gitee.io/img/fm.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: true
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}
+
+// https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
+const getScript = url => new Promise((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = url
+  script.async = true
+  script.onerror = reject
+  script.onload = script.onreadystatechange = function() {
+    const loadState = this.readyState
+    if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+    script.onload = script.onreadystatechange = null
+    resolve()
+  }
+  document.head.appendChild(script)
+})</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-03-05 21:30:57'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+   if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }const asideStatus = saveToLocal.get('aside-status')
+if (asideStatus !== undefined) {
+   if (asideStatus === 'hide') {
+     document.documentElement.classList.add('hide-aside')
+   } else {
+     document.documentElement.classList.remove('hide-aside')
+   }
+}const fontSizeVal = saveToLocal.get('global-font-size')
+if (fontSizeVal !== undefined) {
+  document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+}})()</script><link rel="stylesheet" href="//at.alicdn.com/t/font_2272646_jy3vlys7ayt.css"><meta name="generator" content="Hexo 5.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/kaila.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw iconfont icon-liuyanban1"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/fm.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Kepler23b</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page" href="/books/"><i class="fa-fw fas fa-book"></i><span> 书单</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/guestbook/"><i class="fa-fw iconfont icon-liuyanban1"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">字符设备驱动</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-01-01T04:00:00.000Z" title="发表于 2020-01-01 12:00:00">2020-01-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-03-05T13:30:57.727Z" title="更新于 2021-03-05 21:30:57">2021-03-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E7%AC%94%E8%AE%B0/">嵌入式Linux驱动开发笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="1-字符设备驱动简介"><a class="markdownIt-Anchor" href="#1-字符设备驱动简介"></a> 1 字符设备驱动简介</h2>
+<p>Linux 应用程序对驱动程序的调用流程</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303092546.png" alt="image-20210303092544406" /></p>
+<p>open 函数调用流程</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210303092727.png" alt="image-20210303092725275" /></p>
+<p>Linux 内核文件 include/linux/fs.h  有个 <strong>file_operations</strong>   结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">module</span> *<span class="title">owner</span>;</span></span><br><span class="line">    <span class="keyword">loff_t</span> (*llseek) (struct file *, <span class="keyword">loff_t</span>, <span class="keyword">int</span>);</span><br><span class="line">    <span class="keyword">ssize_t</span> (*read) (struct file *, <span class="keyword">char</span> __user *, <span class="keyword">size_t</span>, <span class="keyword">loff_t</span> *);</span><br><span class="line">    <span class="keyword">ssize_t</span> (*write) (struct file *, <span class="keyword">const</span> <span class="keyword">char</span> __user *, <span class="keyword">size_t</span>, <span class="keyword">loff_t</span> *);</span><br><span class="line">    <span class="keyword">ssize_t</span> (*read_iter) (struct kiocb *, struct iov_iter *);</span><br><span class="line">    <span class="keyword">ssize_t</span> (*write_iter) (struct kiocb *, struct iov_iter *);</span><br><span class="line">    <span class="keyword">int</span> (*iterate) (struct file *, struct dir_context *);</span><br><span class="line">    <span class="function"><span class="keyword">unsigned</span> <span class="title">int</span> <span class="params">(*poll)</span> <span class="params">(struct file *, struct poll_table_struct *)</span></span>;</span><br><span class="line">    <span class="keyword">long</span> (*unlocked_ioctl) (struct file *, <span class="keyword">unsigned</span> <span class="keyword">int</span>, <span class="keyword">unsigned</span> <span class="keyword">long</span>);</span><br><span class="line">    <span class="keyword">long</span> (*compat_ioctl) (struct file *, <span class="keyword">unsigned</span> <span class="keyword">int</span>, <span class="keyword">unsigned</span> <span class="keyword">long</span>);</span><br><span class="line">    <span class="keyword">int</span> (*mmap) (struct file *, struct vm_area_struct *);</span><br><span class="line">    <span class="keyword">int</span> (*mremap)(struct file *, struct vm_area_struct *);</span><br><span class="line">    <span class="keyword">int</span> (*open) (struct inode *, struct file *);</span><br><span class="line">    <span class="keyword">int</span> (*flush) (struct file *, <span class="keyword">fl_owner_t</span> id);</span><br><span class="line">    <span class="keyword">int</span> (*release) (struct inode *, struct file *);</span><br><span class="line">    <span class="keyword">int</span> (*fsync) (struct file *, <span class="keyword">loff_t</span>, <span class="keyword">loff_t</span>, <span class="keyword">int</span> datasync);</span><br><span class="line">    <span class="keyword">int</span> (*aio_fsync) (struct kiocb *, <span class="keyword">int</span> datasync);</span><br><span class="line">    <span class="keyword">int</span> (*fasync) (<span class="keyword">int</span>, struct file *, <span class="keyword">int</span>);</span><br><span class="line">    <span class="keyword">int</span> (*lock) (struct file *, <span class="keyword">int</span>, struct file_lock *);</span><br><span class="line">    <span class="keyword">ssize_t</span> (*sendpage) (struct file *, struct page *, <span class="keyword">int</span>, <span class="keyword">size_t</span>, <span class="keyword">loff_t</span> *, <span class="keyword">int</span>);</span><br><span class="line">    <span class="function"><span class="keyword">unsigned</span> <span class="title">long</span> <span class="params">(*get_unmapped_area)</span><span class="params">(struct file *, <span class="keyword">unsigned</span> <span class="keyword">long</span>, <span class="keyword">unsigned</span> <span class="keyword">long</span>, <span class="keyword">unsigned</span> <span class="keyword">long</span>, <span class="keyword">unsigned</span> <span class="keyword">long</span>)</span></span>;</span><br><span class="line">    <span class="keyword">int</span> (*check_flags)(<span class="keyword">int</span>);</span><br><span class="line">    <span class="keyword">int</span> (*flock) (struct file *, <span class="keyword">int</span>, struct file_lock *);</span><br><span class="line">    <span class="keyword">ssize_t</span> (*splice_write)(struct pipe_inode_info *, struct file *, <span class="keyword">loff_t</span> *, <span class="keyword">size_t</span>, <span class="keyword">unsigned</span> <span class="keyword">int</span>);</span><br><span class="line">    <span class="keyword">ssize_t</span> (*splice_read)(struct file *, <span class="keyword">loff_t</span> *, struct pipe_inode_info *, <span class="keyword">size_t</span>, <span class="keyword">unsigned</span> <span class="keyword">int</span>);</span><br><span class="line">    <span class="keyword">int</span> (*setlease)(struct file *, <span class="keyword">long</span>, struct file_lock **, <span class="keyword">void</span> **);</span><br><span class="line">    <span class="keyword">long</span> (*fallocate)(struct file *file, <span class="keyword">int</span> mode, <span class="keyword">loff_t</span> offset,</span><br><span class="line">                        <span class="keyword">loff_t</span> len);</span><br><span class="line">    <span class="keyword">void</span> (*show_fdinfo)(struct seq_file *m, struct file *f);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> CONFIG_MMU</span></span><br><span class="line">    <span class="keyword">unsigned</span> (*mmap_capabilities)(struct file *);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>字符设备驱动开发就是需要实现上面的函数。像 open、 release、 write、 read 等都是需要实现。</p>
+<h2 id="2-字符设备驱动开发步骤"><a class="markdownIt-Anchor" href="#2-字符设备驱动开发步骤"></a> 2 字符设备驱动开发步骤</h2>
+<p>只是在 Linux 驱动开发中我们需要按照其规定的框架来编写驱动，所以说学 Linux 驱动开发重点是学习其驱动框架。</p>
+<ul>
+<li>编译到内核</li>
+<li>编译成模块</li>
+</ul>
+<p>SD卡启动 nfs挂载文件系统 tftp启动系统</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210304123912.png" alt="image-20210304123909687" /></p>
+<p>模块加载文件夹 将驱动放入/lib/modules/4.1.15</p>
+<p>使用modproe 第一次加载一个模块 需要depmod</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210304125104.png" alt="image-20210304125100682" /></p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210304131258.png" alt="image-20210304131255893" /></p>
+<p>驱动加载成功、卸载成功</p>
+<h3 id="21-驱动模块的加载和卸载"><a class="markdownIt-Anchor" href="#21-驱动模块的加载和卸载"></a> 2.1 驱动模块的加载和卸载</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">module_init(xxx_init); <span class="comment">//注册模块加载函数</span></span><br><span class="line">module_exit(xxx_exit); <span class="comment">//注册模块卸载函数</span></span><br></pre></td></tr></table></figure>
+<p>“insmod”命令加载驱动的时候， xxx_init 这个函数就会被调用</p>
+<p>“rmmod”命令卸载具体驱动的时候，xxx_exit 函数就会被调用</p>
+<p>字符设备驱动模块，加载和卸载函数模板</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 驱动入口函数 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> __init <span class="title">xxx_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">/* 入口函数具体内容 */</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 驱动出口函数 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> __exit <span class="title">xxx_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">/* 出口函数具体内容 */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 将上面两个函数指定为驱动的入口和出口函数 */</span></span><br><span class="line">module_init(xxx_init);</span><br><span class="line">module_exit(xxx_exit);</span><br></pre></td></tr></table></figure>
+<p>驱动编译的扩展名 .ko</p>
+<p>两种命令可以加载驱动模块： insmod和 modprobe</p>
+<p>insmod 命令不能解决模块的依赖关系 ,modprobe 会分析模块的依赖关系 。</p>
+<p>两种命令可以卸载驱动模块： rmmod和 modprobe  -r drv.ko</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rmmod drv.ko</span><br><span class="line">modprobe -r drv.ko</span><br></pre></td></tr></table></figure>
+<h3 id="22-字符设备注册和注销"><a class="markdownIt-Anchor" href="#22-字符设备注册和注销"></a> 2.2 字符设备注册和注销</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">int</span> <span class="title">register_chrdev</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> major, <span class="keyword">const</span> <span class="keyword">char</span> *name,<span class="keyword">const</span> struct file_operations *fops)</span></span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">void</span> <span class="title">unregister_chrdev</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> major, <span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span></span><br></pre></td></tr></table></figure>
+<p>register_chrdev 函数用于注册字符设备，此函数一共有三个参数，这三个参数的含义如下：</p>
+<p>​	major： 主设备号， Linux 下每个设备都有一个设备号，设备号分为主设备号和次设备号两<br />
+​					部分，关于设备号后面会详细讲解。<br />
+​	name：设备名字，指向一串字符串。<br />
+​	fops： 结构体 file_operations 类型指针，指向设备的操作函数集合变量。</p>
+<p>unregister_chrdev 函数用户注销字符设备，此函数有两个参数，这两个参数含义如下：<br />
+major： 要注销的设备对应的主设备号。<br />
+name： 要注销的设备对应的设备名。</p>
+<p>示例代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">test_fops</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 驱动入口函数 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> __init <span class="title">xxx_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> retvalue = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">/* 注册字符设备驱动 */</span></span><br><span class="line">	retvalue = register_chrdev(<span class="number">200</span>, <span class="string">&quot;chrtest&quot;</span>, &amp;test_fops);</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">if</span>(retvalue &lt; <span class="number">0</span>)&#123;</span><br><span class="line">		<span class="comment">/* 字符设备注册失败,自行处理 */</span></span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 驱动出口函数 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> __exit <span class="title">xxx_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    unregister_chrdev(<span class="number">200</span>, <span class="string">&quot;chrtest&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 将上面两个函数指定为驱动的入口和出口函数 */</span></span><br><span class="line">module_init(xxx_init);</span><br><span class="line">module_exit(xxx_exit);</span><br></pre></td></tr></table></figure>
+<p>命令<code>cat /proc/devices</code>可以查看当前已经被使用掉的设备号</p>
+<p>向系统注册字符设备 使用register_chrdev  注销字符设备 unregister_chrdev</p>
+<h3 id="23-实现设备的具体操作函数"><a class="markdownIt-Anchor" href="#23-实现设备的具体操作函数"></a> 2.3 实现设备的具体操作函数</h3>
+<p>1、能够对 chrtest 进行打开和关闭操作</p>
+<p>实现 file_operations 中的 open 和 release 这两个函数</p>
+<p>2、对 chrtest 进行读写操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">static struct file_operations test_fops;</span><br><span class="line"></span><br><span class="line">&#x2F;* 打开设备 *&#x2F;</span><br><span class="line">static int chrtest_open(struct inode *inode, struct file *filp)</span><br><span class="line">&#123;</span><br><span class="line">	&#x2F;* 用户实现具体功能 *&#x2F;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;* 从设备读取 *&#x2F;</span><br><span class="line">static ssize_t chrtest_read(struct file *filp, char __user *buf,</span><br><span class="line">							size_t cnt, loff_t *offt)</span><br><span class="line">&#123;</span><br><span class="line">	&#x2F;* 用户实现具体功能 *&#x2F;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;* 向设备写数据 *&#x2F;</span><br><span class="line">16 static ssize_t chrtest_write(struct file *filp,</span><br><span class="line">								const char __user *buf,</span><br><span class="line">								size_t cnt, loff_t *offt)</span><br><span class="line">&#123;</span><br><span class="line">	&#x2F;* 用户实现具体功能 *&#x2F;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;* 关闭&#x2F;释放设备 *&#x2F;</span><br><span class="line">static int chrtest_release(struct inode *inode, struct file *filp)</span><br><span class="line">&#123;</span><br><span class="line">	&#x2F;* 用户实现具体功能 *&#x2F;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static struct file_operations test_fops &#x3D; &#123;</span><br><span class="line">	.owner &#x3D; THIS_MODULE,</span><br><span class="line">	.open &#x3D; chrtest_open,</span><br><span class="line">	.read &#x3D; chrtest_read,</span><br><span class="line">	.write &#x3D; chrtest_write,</span><br><span class="line">	.release &#x3D; chrtest_release,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">&#x2F;* 驱动入口函数 *&#x2F;</span><br><span class="line">static int __init xxx_init(void)</span><br><span class="line">&#123;</span><br><span class="line">    int retvalue &#x3D; 0;</span><br><span class="line">    &#x2F;* 注册字符设备驱动 *&#x2F;</span><br><span class="line">	retvalue &#x3D; register_chrdev(200, &quot;chrtest&quot;, &amp;test_fops);</span><br><span class="line">	</span><br><span class="line">    if(retvalue &lt; 0)&#123;</span><br><span class="line">		&#x2F;* 字符设备注册失败,自行处理 *&#x2F;</span><br><span class="line">	&#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;* 驱动出口函数 *&#x2F;</span><br><span class="line">static void __exit xxx_exit(void)</span><br><span class="line">&#123;</span><br><span class="line">    unregister_chrdev(200, &quot;chrtest&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;* 将上面两个函数指定为驱动的入口和出口函数 *&#x2F;</span><br><span class="line">module_init(xxx_init);</span><br><span class="line">module_exit(xxx_exit);</span><br></pre></td></tr></table></figure>
+<h3 id="24-添加license和作者信息"><a class="markdownIt-Anchor" href="#24-添加license和作者信息"></a> 2.4 添加LICENSE和作者信息</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MODULE_LICENSE() <span class="comment">//添加模块 LICENSE 信息</span></span><br><span class="line">MODULE_AUTHOR() <span class="comment">//添加模块作者信息</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-linux设备号"><a class="markdownIt-Anchor" href="#3-linux设备号"></a> 3 Linux设备号</h2>
+<p>32位 主设备号12位 次设备号20位</p>
+<p>设备号的操作或者宏</p>
+<p>从dev_t获取主设备号和次设备号，MAJOR(dev_t)</p>
+<h2 id="5-应用程序编写"><a class="markdownIt-Anchor" href="#5-应用程序编写"></a> 5 应用程序编写</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio,h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc,<span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> ret = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> fd = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">char</span> *filename;</span><br><span class="line">    filename = argv[<span class="number">1</span>];</span><br><span class="line">    fd = open(filename,o_ROWR);</span><br><span class="line">    <span class="keyword">if</span>(fd &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Can&#x27;t open file %s\r\n&quot;</span>,filename);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ret = read(fd,readbuf,<span class="number">50</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;read file file&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ret = write(fd,writebuf,<span class="number">50</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ret = close(fd);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;close file falied \r\n&quot;</span>,filename);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="6-测试"><a class="markdownIt-Anchor" href="#6-测试"></a> 6 测试</h2>
+<p>1、加载驱动</p>
+<p>2、进入/dev查看设备文件，chrdevbase。/dev/chrdevbase。但是实际没有，因为我们没有创建设备节点文件。</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210304214332.png" alt="image-20210304214329308" /></p>
+<p>查询设备节点</p>
+<p>mknod /dev/chrdevbase c 200 0</p>
+<p>3、测试</p>
+<p>运行APP文件</p>
+<p><img src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20210304221446.png" alt="image-20210304221443965" /></p>
+<h2 id="4-chrdevbase字符设备驱动开发实验"><a class="markdownIt-Anchor" href="#4-chrdevbase字符设备驱动开发实验"></a> 4 chrdevbase字符设备驱动开发实验</h2>
+<p>应用程序可以对驱动读写操作，读就是从驱动里面读取字符串，写的话就是应用向驱动写字符串。</p>
+<p>1、chrdevbase_read驱动函数的编写</p>
+<p>copy_to_user(buf,readbuf,count);</p>
+<p>memcpy(readbuf,kerneldata,sizeof(kerneldata));</p>
+<p>2、chrdevbase_write驱动函数的编写</p>
+<p>copy_form_user(writebuf,buf,count);</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Rowe</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6/">https://kepler23b.gitee.io/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://kepler23b.gitee.io" target="_blank">Kepler23b</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/I-MX6U/">I.MX6U</a></div><div class="post_share"><div class="social-share" data-image="/img/fm.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.png" target="_blank"><img class="post-qr-code-img" src="/img/wechat.png" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li></ul></div></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2020/01/01/%E5%B5%8C%E5%85%A5%E5%BC%8FLinux_Notes/Linux%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E5%92%8C%E7%A7%BB%E6%A4%8D/"><img class="prev-cover" src="/img/fm.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Linux内核编译和移植</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/01/01/嵌入式Linux_Notes/I.MX6U点灯c语言/" title="I.MX6U点灯（c语言）"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">I.MX6U点灯（c语言）</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/通用驱动开发格式/" title="I.MX6U通用驱动开发格式"><img class="cover" src="https://gitee.com/kepler23b/imagesbed/raw/master/img/20201231231314.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">I.MX6U通用驱动开发格式</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/U-Boot移植/" title="U-Boot使用和移植"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">U-Boot使用和移植</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/U-Boot图形化配置及其原理/" title="U-Boot图形化配置及其原理"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">U-Boot图形化配置及其原理</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/MigTool烧写工具详解/" title="嵌入式Linux系统烧写"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">嵌入式Linux系统烧写</div></div></a></div><div><a href="/2020/01/01/嵌入式Linux_Notes/根文件系统的构建/" title="根文件系统构建"><img class="cover" src="/img/fm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-01</div><div class="title">根文件系统构建</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside_content" id="aside_content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="card-content"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text"> 1 字符设备驱动简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.</span> <span class="toc-text"> 2 字符设备驱动开发步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9D%97%E7%9A%84%E5%8A%A0%E8%BD%BD%E5%92%8C%E5%8D%B8%E8%BD%BD"><span class="toc-number">2.1.</span> <span class="toc-text"> 2.1 驱动模块的加载和卸载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E6%B3%A8%E5%86%8C%E5%92%8C%E6%B3%A8%E9%94%80"><span class="toc-number">2.2.</span> <span class="toc-text"> 2.2 字符设备注册和注销</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E5%AE%9E%E7%8E%B0%E8%AE%BE%E5%A4%87%E7%9A%84%E5%85%B7%E4%BD%93%E6%93%8D%E4%BD%9C%E5%87%BD%E6%95%B0"><span class="toc-number">2.3.</span> <span class="toc-text"> 2.3 实现设备的具体操作函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-%E6%B7%BB%E5%8A%A0license%E5%92%8C%E4%BD%9C%E8%80%85%E4%BF%A1%E6%81%AF"><span class="toc-number">2.4.</span> <span class="toc-text"> 2.4 添加LICENSE和作者信息</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-linux%E8%AE%BE%E5%A4%87%E5%8F%B7"><span class="toc-number">3.</span> <span class="toc-text"> 3 Linux设备号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%BC%96%E5%86%99"><span class="toc-number">4.</span> <span class="toc-text"> 5 应用程序编写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%B5%8B%E8%AF%95"><span class="toc-number">5.</span> <span class="toc-text"> 6 测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-chrdevbase%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E9%AA%8C"><span class="toc-number">6.</span> <span class="toc-text"> 4 chrdevbase字符设备驱动开发实验</span></a></li></ol></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By Rowe</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.spacingElementById('content-inner')
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.spacingElementById('content-inner')
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',()=> {preloader.endLoading()})</script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'RiH3aqpXtXSQRgRyiCiep9RP-gzGzoHsz',
+      appKey: '0y9T1JOKvO6itNxJBcMwQq5g',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: true,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign({}, initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.querySelector('#vcomment'),loadValine)
+  else setTimeout(() => loadValine(), 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div class="aplayer no-destroy" data-id="5383178516" data-server="netease" data-type="playlist" data-fixed="true" data-mini="true" data-listFolded="false" data-order="random" data-preload="none" data-autoplay="false" muted></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/gh/metowolf/MetingJS@1.2/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config_change',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', '', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})</script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","hOffset":0,"vOffset":-20,"width":150,"height":300},"mobile":{"show":false},"react":{"opacity":0.9},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
