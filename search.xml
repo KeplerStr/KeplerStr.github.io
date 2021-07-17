@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title></title>
+      <link href="2021/07/17/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86_Notes/%E6%A4%92%E7%9B%90%E5%99%AA%E5%A3%B0%E5%92%8C%E9%AB%98%E6%96%AF%E5%99%AA%E5%A3%B0/"/>
+      <url>2021/07/17/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86_Notes/%E6%A4%92%E7%9B%90%E5%99%AA%E5%A3%B0%E5%92%8C%E9%AB%98%E6%96%AF%E5%99%AA%E5%A3%B0/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h2 id="椒盐噪声"><a class="markdownIt-Anchor" href="#椒盐噪声"></a> 椒盐噪声</h2><h3 id="简介"><a class="markdownIt-Anchor" href="#简介"></a> 简介</h3><p>椒盐噪声又被称作脉冲噪声，它会随机改变图像中的像素值，是由相机成像、图像传输、解码处理等过程产生的黑白相间的亮暗点噪声，其样子就像在图像上随机的撒上一些盐粒和黑椒粒，因此被称为椒盐噪声。</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>c++基础</title>
       <link href="2020/01/01/C++%E5%9F%BA%E7%A1%80/"/>
       <url>2020/01/01/C++%E5%9F%BA%E7%A1%80/</url>
